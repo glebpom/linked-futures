@@ -40,14 +40,22 @@ use tokio::timer::{delay, Interval};
 
 use linked_futures::{link_futures, linked_block};
 
-linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutreIdentifier; Forwarder, Reader, Generator, Stop);
+linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutreIdentifier; 
+    Forwarder,
+    Reader,
+    Generator,
+    Stop
+);
 
 #[tokio::main]
 async fn main() {
     let (mut tx1, mut rx1) = mpsc::channel::<Instant>(1);
     let (mut tx2, mut rx2) = mpsc::channel::<Instant>(1);
+    
+    let mut interval = Interval::new(clock::now(), Duration::from_millis(100));
+
     let generator = async {
-        while let Some(instant) = Interval::new(clock::now(), Duration::from_millis(100)).take(1).next().await {
+        while let Some(instant) = interval.next().await {
             tx1.send(instant).await;
         }
     };
@@ -61,8 +69,12 @@ async fn main() {
             println!("instant: {:?}", instant);
         }
     };
-    let stop = async { delay(clock::now() + Duration::from_secs(1)).await; };
-    let linked = link_futures!(PeriodicStoppableSender, PeriodicStoppableSenderFutreIdentifier;
+    let stop = async { 
+        delay(clock::now() + Duration::from_secs(1)).await; 
+    };
+    let linked = link_futures!(
+       PeriodicStoppableSender, 
+       PeriodicStoppableSenderFutreIdentifier;
        Generator => generator,
        Forwarder => forwarder,
        Reader => reader,
@@ -72,8 +84,10 @@ async fn main() {
         pin_mut!(linked);
         let (completed_future_identifier, _) = linked.await;
         match completed_future_identifier {
-            PeriodicStoppableSenderFutreIdentifier::Stop => println!("linked block stopped normally"),
-            n => panic!("linked block unexpectedly terminated by future: {:?}", n),
+            PeriodicStoppableSenderFutreIdentifier::Stop => 
+                println!("linked block stopped normally"),
+            n => 
+                panic!("linked block unexpectedly terminated by future: {:?}", n),
         }
     });
 }
