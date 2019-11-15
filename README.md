@@ -1,4 +1,12 @@
 # linked-futures
+[![Crates.io][crates-badge]][crates-url]
+[![MIT licensed][mit-badge]][mit-url]
+[![Build Status](https://travis-ci.org/glebpom/linked-futures.svg?branch=master)](https://travis-ci.org/glebpom/linked-futures)
+
+[crates-badge]: https://img.shields.io/crates/v/linked-futures.svg
+[crates-url]: https://crates.io/crates/linked-futures
+[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[mit-url]: LICENSE
 
 ## Overview
 
