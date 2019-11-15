@@ -1,3 +1,11 @@
+#![doc(html_root_url = "https://docs.rs/linked-futures/0.1.1")]
+#![warn(
+    missing_debug_implementations,
+    rust_2018_idioms,
+    unreachable_pub
+)]
+#![deny(intra_doc_link_resolution_failure)]
+
 //! This crate provides the way to "link" futures into a single block,
 //! which stops executing once any of these futures complete.
 //!
@@ -13,7 +21,7 @@ macro_rules! linked_block {
         one_of_futures::impl_one_of!($one_of_block; $($variants),*);
 
         #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-        pub enum $identifier_enum {
+        enum $identifier_enum {
             $($variants),*
         }
     }
@@ -120,5 +128,15 @@ mod tests {
         );
         let (stopped_future_name, _) = block_on(async { block.await });
         assert_eq!(stopped_future_name, SimpleBlockFutureIdentifier::Stop);
+    }
+
+    #[test]
+    fn test_readme_deps() {
+        version_sync::assert_markdown_deps_updated!("README.md");
+    }
+
+    #[test]
+    fn test_html_root_url() {
+        version_sync::assert_html_root_url_updated!("src/lib.rs");
     }
 }

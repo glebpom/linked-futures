@@ -1,6 +1,6 @@
 [package]
 name = "linked-futures"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Gleb Pomykalov <gleb@lancastr.com>"]
 edition = "2018"
 description = "Link futures into a block, which stops all of the included futures when any of the futures complete"
