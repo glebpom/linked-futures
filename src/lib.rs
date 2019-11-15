@@ -60,7 +60,7 @@ macro_rules! linked_block {
 ///        Forwarder => forwarder,
 ///        Reader => reader,
 ///        Stop => stop
-///    );
+///     );
 ///     block_on(async {
 ///         pin_mut!(linked);
 ///         let (completed_future_identifier, _) = linked.await;
