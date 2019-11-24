@@ -1,6 +1,6 @@
 [package]
 name = "linked-futures"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Gleb Pomykalov <gleb@lancastr.com>"]
 edition = "2018"
 description = "Link futures into a block, which stops all of the included futures when any of the futures complete"
@@ -8,16 +8,20 @@ keywords = ["futures", "link", "merge", "join", "async"]
 categories = ["asynchronous"]
 license = "MIT"
 homepage = "https://github.com/glebpom/linked-futures"
-documentation = "https://docs.rs/linked-futures/0.1.1/linked-futures/"
+documentation = "https://docs.rs/linked-futures/0.1.2/linked-futures/"
 repository = "https://github.com/glebpom/linked-futures"
 readme = "README.md"
 
 [dependencies]
-one-of-futures = "0.1.1"
-futures-core-preview = "0.3.0-alpha.19"
+one-of-futures = "0.1.2"
+futures-preview = "0.3.0-alpha.19"
 
 [dev-dependencies]
-futures-preview = "0.3.0-alpha.19"
 version-sync = "0.8"
 tokio = "0.2.0-alpha.6"
 
+[workspace]
+members = [
+  ".",
+  "test-linked-futures"
+]

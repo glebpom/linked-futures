@@ -40,7 +40,7 @@ use tokio::timer::{delay, Interval};
 
 use linked_futures::{link_futures, linked_block};
 
-linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutreIdentifier; 
+linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutureIdentifier; 
     Forwarder,
     Reader,
     Generator,
@@ -74,7 +74,7 @@ async fn main() {
     };
     let linked = link_futures!(
        PeriodicStoppableSender, 
-       PeriodicStoppableSenderFutreIdentifier;
+       PeriodicStoppableSenderFutureIdentifier;
        Generator => generator,
        Forwarder => forwarder,
        Reader => reader,
@@ -84,7 +84,7 @@ async fn main() {
         pin_mut!(linked);
         let (completed_future_identifier, _) = linked.await;
         match completed_future_identifier {
-            PeriodicStoppableSenderFutreIdentifier::Stop => 
+            PeriodicStoppableSenderFutureIdentifier::Stop => 
                 println!("linked block stopped normally"),
             n => 
                 panic!("linked block unexpectedly terminated by future: {:?}", n),

@@ -1,9 +1,5 @@
-#![doc(html_root_url = "https://docs.rs/linked-futures/0.1.1")]
-#![warn(
-    missing_debug_implementations,
-    rust_2018_idioms,
-    unreachable_pub
-)]
+#![doc(html_root_url = "https://docs.rs/linked-futures/0.1.2")]
+#![warn(missing_debug_implementations, rust_2018_idioms, unreachable_pub)]
 #![deny(intra_doc_link_resolution_failure)]
 
 //! This crate provides the way to "link" futures into a single block,
@@ -14,11 +10,14 @@
 //! [`one-of-futures`](https://crates.io/crates/one-of-futures) crate is generated for
 //! each [`link_futures`](macro.link_futures.html) block.
 
+pub use futures::stream::{FuturesUnordered, StreamExt};
+pub use one_of_futures::impl_one_of;
+
 /// Create necessary enums for later usage with [`link_futures`](macro.link_futures.html)
 #[macro_export]
 macro_rules! linked_block {
     ( $one_of_block:ident, $identifier_enum:ident; $($variants:ident),* ) => {
-        one_of_futures::impl_one_of!($one_of_block; $($variants),*);
+        $crate::impl_one_of!($one_of_block; $($variants),*);
 
         #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
         enum $identifier_enum {
@@ -41,7 +40,7 @@ macro_rules! linked_block {
 ///
 /// use linked_futures::{link_futures, linked_block};
 ///
-/// linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutreIdentifier;
+/// linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutureIdentifier;
 ///     Forwarder,
 ///     Reader,
 ///     Generator,
@@ -75,7 +74,7 @@ macro_rules! linked_block {
 ///     };
 ///     let linked = link_futures!(
 ///        PeriodicStoppableSender,
-///        PeriodicStoppableSenderFutreIdentifier;
+///        PeriodicStoppableSenderFutureIdentifier;
 ///        Generator => generator,
 ///        Forwarder => forwarder,
 ///        Reader => reader,
@@ -85,7 +84,7 @@ macro_rules! linked_block {
 ///         pin_mut!(linked);
 ///         let (completed_future_identifier, _) = linked.await;
 ///         match completed_future_identifier {
-///             PeriodicStoppableSenderFutreIdentifier::Stop =>
+///             PeriodicStoppableSenderFutureIdentifier::Stop =>
 ///                 println!("linked block stopped normally"),
 ///             n =>
 ///                 panic!("linked block unexpectedly terminated by future: {:?}", n),
@@ -96,12 +95,12 @@ macro_rules! linked_block {
 #[macro_export]
 macro_rules! link_futures {
     ( $one_of_block:ident, $identifier_enum:ident; $( $key:ident => $value:expr ),* ) => {{
-        let mut linked = ::futures::stream::FuturesUnordered::new();
+        let mut linked = $crate::FuturesUnordered::new();
         $( linked.push($one_of_block::$key(async {
             ($identifier_enum::$key, $value.await)
         })); )*
         async move {
-            use futures::stream::StreamExt;
+            use $crate::StreamExt;
 
             linked.next().await.unwrap()
         }
@@ -110,26 +109,6 @@ macro_rules! link_futures {
 
 #[cfg(test)]
 mod tests {
-    use futures::channel::oneshot;
-    use futures::executor::block_on;
-
-    use super::*;
-
-    linked_block!(SimpleBlock, SimpleBlockFutureIdentifier; Never, Stop);
-
-    #[test]
-    fn it_works() {
-        let (_tx, rx) = oneshot::channel::<()>();
-        let block = link_futures!(SimpleBlock, SimpleBlockFutureIdentifier;
-            Never => async {
-                let _ = rx.await;
-            },
-            Stop => async { }
-        );
-        let (stopped_future_name, _) = block_on(async { block.await });
-        assert_eq!(stopped_future_name, SimpleBlockFutureIdentifier::Stop);
-    }
-
     #[test]
     fn test_readme_deps() {
         version_sync::assert_markdown_deps_updated!("README.md");
