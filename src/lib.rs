@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/linked-futures/0.1.2")]
+#![doc(html_root_url = "https://docs.rs/linked-futures/0.1.3")]
 #![warn(missing_debug_implementations, rust_2018_idioms, unreachable_pub)]
 #![deny(intra_doc_link_resolution_failure)]
 
@@ -30,13 +30,12 @@ macro_rules! linked_block {
 ///
 /// Example:
 /// ```rust
-/// use std::time::{Duration, Instant};
+/// use std::time::Duration;
 ///
 /// use futures::{pin_mut, SinkExt, StreamExt};
 /// use futures::channel::mpsc;
 /// use futures::executor::block_on;
-/// use tokio::clock;
-/// use tokio::timer::{delay, Interval};
+/// use tokio::time::{delay_for, interval, Instant};
 ///
 /// use linked_futures::{link_futures, linked_block};
 ///
@@ -52,7 +51,7 @@ macro_rules! linked_block {
 ///     let (mut tx1, mut rx1) = mpsc::channel::<Instant>(1);
 ///     let (mut tx2, mut rx2) = mpsc::channel::<Instant>(1);
 ///
-///     let mut interval = Interval::new(clock::now(), Duration::from_millis(100));
+///     let mut interval = interval(Duration::from_millis(100));
 ///
 ///     let generator = async {
 ///         while let Some(instant) = interval.next().await {
@@ -70,7 +69,7 @@ macro_rules! linked_block {
 ///         }
 ///     };
 ///     let stop = async {
-///         delay(clock::now() + Duration::from_secs(1)).await;
+///         delay_for(Duration::from_secs(1)).await;
 ///     };
 ///     let linked = link_futures!(
 ///        PeriodicStoppableSender,

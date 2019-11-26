@@ -30,13 +30,12 @@ linked-futures = "0.1"
 
 ## Example
 ```rust
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use futures::{pin_mut, SinkExt, StreamExt};
 use futures::channel::mpsc;
 use futures::executor::block_on;
-use tokio::clock;
-use tokio::timer::{delay, Interval};
+use tokio::time::{delay_for, interval, Instant};
 
 use linked_futures::{link_futures, linked_block};
 
@@ -51,8 +50,8 @@ linked_block!(PeriodicStoppableSender, PeriodicStoppableSenderFutureIdentifier;
 async fn main() {
     let (mut tx1, mut rx1) = mpsc::channel::<Instant>(1);
     let (mut tx2, mut rx2) = mpsc::channel::<Instant>(1);
-    
-    let mut interval = Interval::new(clock::now(), Duration::from_millis(100));
+
+    let mut interval = interval(Duration::from_millis(100));
 
     let generator = async {
         while let Some(instant) = interval.next().await {
@@ -69,8 +68,8 @@ async fn main() {
             println!("instant: {:?}", instant);
         }
     };
-    let stop = async { 
-        delay(clock::now() + Duration::from_secs(1)).await; 
+    let stop = async {
+        delay_for(Duration::from_secs(1)).await;
     };
     let linked = link_futures!(
        PeriodicStoppableSender, 
@@ -84,9 +83,9 @@ async fn main() {
         pin_mut!(linked);
         let (completed_future_identifier, _) = linked.await;
         match completed_future_identifier {
-            PeriodicStoppableSenderFutureIdentifier::Stop => 
+            PeriodicStoppableSenderFutureIdentifier::Stop =>
                 println!("linked block stopped normally"),
-            n => 
+            n =>
                 panic!("linked block unexpectedly terminated by future: {:?}", n),
         }
     });

@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 linked-futures = { path = ".." }
-futures-preview = "0.3.0-alpha.19"
+futures = "0.3.1"
